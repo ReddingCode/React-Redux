@@ -100,8 +100,6 @@ function reducer(state = initialState, action) {
     return
     }
     })
-
-   
   }
 
   return state;
