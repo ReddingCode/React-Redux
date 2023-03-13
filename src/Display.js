@@ -7,8 +7,8 @@ export function Display() {
   // du state
   const gameIsPlaying = useSelector((state) => state.playing)
   const winner = useSelector((state) => state.winner)
-  const player1Score = useSelector((state) => state.player1Score)
-  const player2Score = useSelector((state) => state.player2Score)
+  const player1Score = useSelector((state) => state.player1)
+  const player2Score = useSelector((state) => state.player2)
   const advantage = useSelector((state) => state.advantage)
 
   if (winner) {

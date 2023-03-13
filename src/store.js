@@ -1,4 +1,5 @@
 import { createStore } from "redux";
+import produce from "immer";
 
 // state
 const initialState = {
@@ -7,6 +8,10 @@ const initialState = {
   advantage: null,
   winner: null,
   playing: true,
+  // historique des jeux joués
+  history: [
+    // { player1: 15, player2: 40, winner: "player2" }
+  ],
 };
 
 // actions creators
@@ -22,16 +27,34 @@ export const pointScored = (player) => ({
 
 function reducer(state = initialState, action) {
   if (action.type === "restart") {
-    return initialState;
+    return produce(state, (draft) => {
+        // si le match est terminé, on ajoute un élément à l'historique
+        if (draft.winner) {
+          draft.history.push({
+            player1: draft.player1,
+            player2: draft.player2,
+            winner: draft.winner,
+          })
+        }
+        // puis on reset les autres propriétés
+        draft.player1 = 0;
+        draft.player2 = 0;
+        draft.advantage = null;
+        draft.winner = null;
+        draft.playing = true;
+    }) 
   }
   if (action.type === "playPause") {
     if (state.winner) {
       return state;
     }
-    return {
-      ...state,
-      playing: !state.playing,
-    };
+    return produce(state, (draft) => {
+      draft.playing = !state.playing
+    })
+    // return {
+    //   ...state,
+    //   playing: !state.playing,
+    // };
   }
   if (action.type === "pointScored") {
     const player = action.payload.player;
@@ -44,32 +67,49 @@ function reducer(state = initialState, action) {
       // On ne peut pas marquer de point si le set est en pause
       return state;
     }
-    const currentPlayerScore = state[player];
-    if (currentPlayerScore <= 15) {
+    return produce(state, (draft) => {
+      const currentPlayerScore = draft[player];
+      if (currentPlayerScore <= 15) {
       // 0 ou 15 => on ajoute 15
-      return { ...state, [player]: currentPlayerScore + 15 };
+      draft[player] += 15;
+      return
     }
     if (currentPlayerScore === 30) {
-      return { ...state, [player]: 40 };
+        draft[player] = 40
+        return
+     }
+   if (currentPlayerScore === 40) {
+    if (draft[otherPlayer] !== 40) {
+      // Le joueur à gagné
+        draft.winner = player
+        return
     }
-    if (currentPlayerScore === 40) {
-      if (state[otherPlayer] !== 40) {
-        // Le joueur à gagné
-        return { ...state, winner: player };
-      }
-      if (state.advantage === player) {
-        // Le joueur à gagné
-        return { ...state, winner: player };
-      }
-      if (state.advantage === null) {
-        // Le joueur a maintenant l'avantage
-        return { ...state, advantage: player };
-      }
-      // L'autre joueur a perdu l'avantage
-      return { ...state, advantage: null };
+    if (draft.advantage === player) {
+      // Le joueur à gagné
+        draft.winner = player
+        return
+      // return { ...state, winner: player };
     }
+    if (draft.advantage === null) {
+      // Le joueur a maintenant l'avantage
+        draft.advantage = player
+        return
+      // return { ...state, advantage: player };
+    }
+    draft.advantage = null
+    return
+    }
+    })
+
+   
   }
+
   return state;
 }
 
 export const store = createStore(reducer);
+
+store.subscribe(() => {
+  console.log("Nouveau state:");
+  console.log(store.getState());
+});
