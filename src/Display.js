@@ -7,7 +7,7 @@ export function Display() {
   // qui permet de récupérer uniquement la propriété `playing`
   // du state
       const displayText = useSelector(selectDisplayText)
-    return <p>{displayText}</p>
+    return <p className="display">{displayText}</p>
   }
   // on peut ensuite utiliser cette valeur dans le rendu
   

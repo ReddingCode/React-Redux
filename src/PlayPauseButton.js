@@ -1,10 +1,13 @@
-import { useDispatch } from "react-redux";
-import { playPause } from './store'
+import { useSelector, useStore } from "react-redux";
+import { selectGameIsPlaying } from "./selectors";
+import { autoplay } from './store'
 
 export function PlayPauseButton() {
     // on utilise le hooks useDispatch dans notre composant
      // pour récupérer la fonction dispatch de redux
-    const dispatch = useDispatch()
+    // const dispatch = useDispatch()
+    const store = useStore()
+    const playing = useSelector(selectGameIsPlaying)
 
     return (
         <button
@@ -12,10 +15,11 @@ export function PlayPauseButton() {
         onClick={() => {
          // au clique sur le bouton on exécute la fonction dispatch
         // avec une action.
-        dispatch(playPause())
+        // dispatch(playPause())
+        autoplay(store)
           
         }}>
-            Pause / Reprendre
+            {playing ? "Point en cours..." : "Jouer"}
         </button>
     )
 }
